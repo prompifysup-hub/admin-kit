@@ -1,0 +1,46 @@
+import { jsx as _jsx, jsxs as _jsxs } from "react/jsx-runtime";
+import { useState } from "react";
+import { Form, required, useLogin, useNotify } from "ra-core";
+import { Button } from "../ui/button";
+import { TextInput } from "./text-input";
+import { Notification } from "./notification";
+/**
+ * Login page displayed when authentication is enabled and the user is not authenticated.
+ *
+ * Automatically shown when an unauthenticated user tries to access a protected route.
+ * Handles login via authProvider.login() and displays error notifications on failure.
+ *
+ * @see {@link https://marmelab.com/shadcn-admin-kit/docs/loginpage LoginPage documentation}
+ * @see {@link https://marmelab.com/shadcn-admin-kit/docs/security Security documentation}
+ */
+export const LoginPage = (props) => {
+    const { redirectTo } = props;
+    const [loading, setLoading] = useState(false);
+    const login = useLogin();
+    const notify = useNotify();
+    const handleSubmit = (values) => {
+        setLoading(true);
+        login(values, redirectTo)
+            .then(() => {
+            setLoading(false);
+        })
+            .catch((error) => {
+            setLoading(false);
+            notify(typeof error === "string"
+                ? error
+                : typeof error === "undefined" || !error.message
+                    ? "ra.auth.sign_in_error"
+                    : error.message, {
+                type: "error",
+                messageArgs: {
+                    _: typeof error === "string"
+                        ? error
+                        : error && error.message
+                            ? error.message
+                            : undefined,
+                },
+            });
+        });
+    };
+    return (_jsxs("div", { className: "min-h-screen flex", children: [_jsxs("div", { className: "container relative grid flex-col items-center justify-center sm:max-w-none lg:grid-cols-2 lg:px-0", children: [_jsxs("div", { className: "relative hidden h-full flex-col bg-muted p-10 text-white dark:border-r lg:flex", children: [_jsx("div", { className: "absolute inset-0 bg-zinc-900" }), _jsxs("div", { className: "relative z-20 flex items-center text-lg font-medium", children: [_jsx("svg", { xmlns: "http://www.w3.org/2000/svg", viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: "2", strokeLinecap: "round", strokeLinejoin: "round", className: "mr-2 h-6 w-6", children: _jsx("path", { d: "M15 6v12a3 3 0 1 0 3-3H6a3 3 0 1 0 3 3V6a3 3 0 1 0-3 3h12a3 3 0 1 0-3-3" }) }), "Acme Inc"] }), _jsx("div", { className: "relative z-20 mt-auto", children: _jsxs("blockquote", { className: "space-y-2", children: [_jsx("p", { className: "text-lg", children: "\u201CShadcn Admin Kit has allowed us to quickly create and evolve a powerful tool that otherwise would have taken months of time and effort to develop.\u201D" }), _jsx("footer", { className: "text-sm", children: "John Doe" })] }) })] }), _jsx("div", { className: "lg:p-8", children: _jsxs("div", { className: "mx-auto flex w-full flex-col justify-center space-y-6 sm:w-[350px]", children: [_jsxs("div", { className: "flex flex-col space-y-2 text-center", children: [_jsx("h1", { className: "text-2xl font-semibold tracking-tight", children: "Sign in" }), _jsx("p", { className: "text-sm leading-none text-muted-foreground", children: "Try janedoe@acme.com / password" })] }), _jsxs(Form, { className: "space-y-8", onSubmit: handleSubmit, children: [_jsx(TextInput, { label: "Email", source: "email", type: "email", validate: required() }), _jsx(TextInput, { label: "Password", source: "password", type: "password", validate: required() }), _jsx(Button, { type: "submit", className: "cursor-pointer", disabled: loading, children: "Sign in" })] })] }) })] }), _jsx(Notification, {})] }));
+};

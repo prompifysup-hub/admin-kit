@@ -1,0 +1,52 @@
+import { jsx as _jsx } from "react/jsx-runtime";
+import get from "lodash/get";
+import { useFieldValue, useTranslate } from "ra-core";
+import { cn } from "../lib/utils";
+/**
+ * Displays a downloadable file link with customizable title and target.
+ *
+ * This field renders file URLs as clickable links that can open in new tabs or trigger downloads.
+ * It supports arrays of files and prevents click bubbling in DataTable rows.
+ * To be used with RecordField or DataTable.Col components, or anywhere a RecordContext is available.
+ *
+ * @see {@link https://marmelab.com/shadcn-admin-kit/docs/filefield/ FileField documentation}
+ *
+ * @example
+ * import { FileField } from './file-field';
+ *
+ * <FileField source="url" title="title" />
+ *
+ * // renders the record { id: 123, url: 'doc.pdf', title: 'Presentation' } as
+ * <div>
+ *     <a href="doc.pdf" title="Presentation">Presentation</a>
+ * </div>
+ */
+export const FileField = (props) => {
+    const { className, empty, title, src, target, download, defaultValue, source, record, ...rest } = props;
+    const sourceValue = useFieldValue({ defaultValue, source, record });
+    const titleValue = useFieldValue({
+        ...props,
+        // @ts-expect-error We ignore here because title might be a custom label or undefined instead of a field name
+        source: title,
+    })?.toString() ?? title;
+    const translate = useTranslate();
+    if (sourceValue == null ||
+        (Array.isArray(sourceValue) && sourceValue.length === 0)) {
+        if (!empty) {
+            return null;
+        }
+        return (_jsx("div", { className: cn("inline-block", className), ...rest, children: typeof empty === "string" ? translate(empty, { _: empty }) : empty }));
+    }
+    if (Array.isArray(sourceValue)) {
+        return (_jsx("ul", { className: cn("inline-block", className), ...rest, children: sourceValue.map((file, index) => {
+                const fileTitleValue = title ? get(file, title, title) : title;
+                const srcValue = src ? get(file, src, title) : title;
+                return (_jsx("li", { children: _jsx("a", { href: srcValue, title: fileTitleValue, target: target, download: download, 
+                        // useful to prevent click bubbling in a DataTable with rowClick
+                        onClick: (e) => e.stopPropagation(), children: fileTitleValue }) }, index));
+            }) }));
+    }
+    return (_jsx("div", { className: cn("inline-block", className), ...rest, children: _jsx("a", { href: sourceValue?.toString(), title: titleValue, target: target, download: download, 
+            // useful to prevent click bubbling in a DataTable with rowClick
+            onClick: (e) => e.stopPropagation(), children: titleValue }) }));
+};
